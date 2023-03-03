@@ -8,6 +8,10 @@ But like always no guarantee.
 Using Papa parse + Grid.JS to display CSV data from linked files.  
 [Documentation](https://portalzine.de/dev/bookstack-embed-local-csv-files/)
 
+**PDF - Embed**  
+Embed PDF within page for preview  
+[Documentation](https://github.com/BookStackApp/BookStack/issues/705 )
+
 ### Support & Issues
 
 Feel free to raise an issue for bugs or incorrect content.
