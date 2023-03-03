@@ -1,0 +1,145 @@
+<!-- 
+FEATURED HERE: 
+https://github.com/BookStackApp/BookStack/issues/705 
+-->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.0.466/pdf.min.js"></script>
+<style>
+canvas[data-pdfurl] {
+    background-color: lightgrey;
+    width: 100%;
+}
+.page-content a {
+    color: #39f;
+    text-decoration: underline;
+}
+.pdf-wrapper {
+    position: relative;
+    height: 80vh;
+    width: 100%;
+}
+.pdf-wrapper .download-link {
+    position: absolute;
+    top: -2em;
+    right: 0;
+    z-index: 50;
+}
+.pdf-wrapper .pdf-scroller {
+    height: 100%;
+    overflow: auto;
+}
+</style>
+
+<script type="text/javascript">
+// ------------------- THIS SECTION ADDS A PDF BUTTON TO THE EDITOR TOOLBAR THAT ALLOWS YOU TO EMBED PDFS 
+
+// Use BookStack editor event to add custom "Insert PDF" button into main toolbar
+window.addEventListener('editor-tinymce::pre-init', event => {
+    const mceConfig = event.detail.config;
+    mceConfig.content_style = mceConfig.content_style + ".page_break:before{ background: #f5f5f5;display: block;margin: 30px 0; text-align: center;position: relative;color: red;content :'---- Pagebreak ----';}"
+    mceConfig.toolbar = mceConfig.toolbar.replace('link', 'link insertpdf insertbreak')
+});
+
+
+
+// Use BookStack editor event to define the custom "Insert PDF" button.
+window.addEventListener('editor-tinymce::setup', event => {
+    const editor = event.detail.editor;
+
+
+    editor.ui.registry.addButton('insertbreak', {
+        tooltip: 'Insert PDF',
+        icon: 'page-break',
+        onAction: function(e) {
+            editor.insertContent('<div class="page_break"></div>');
+            e.close();
+        }
+    });
+
+    // Add PDF insert button
+    editor.ui.registry.addButton('insertpdf', {
+        tooltip: 'Insert PDF',
+        icon: 'document-properties',
+        onAction() {
+            editor.windowManager.open({
+                title: 'Insert PDF',
+                body: {
+                    type: 'panel',
+                    items: [{
+                        type: 'textarea',
+                        name: 'pdfurl',
+                        label: 'PDF URL'
+                    }]
+                },
+                onSubmit: function(e) {
+                    // Insert content when the window form is submitted
+                    editor.insertContent('<p>&nbsp;<canvas data-pdfurl="' + e.getData().pdfurl + '"></canvas>&nbsp;</p>');
+                    e.close();
+                },
+                buttons: [{
+                    type: 'submit',
+                    text: 'Insert PDF'
+                }]
+            });
+        }
+    });
+
+});
+
+//-------------------- THE CODE BELOW SHALL BE ACTIVE IN VIEWING MODE TO EMBED PDFS
+var renderPdf = function(canvas) {
+    var url = canvas.dataset.pdfurl;
+    var pdf = null;
+    // wrap canvas in div
+    var wrapper = document.createElement('div');
+    wrapper.className = 'pdf-wrapper';
+    var scroller = document.createElement('div');
+    scroller.className = 'pdf-scroller';
+    wrapper.appendChild(scroller);
+    canvas.parentNode.insertBefore(wrapper, canvas.nextSibling);
+    scroller.insertBefore(canvas, null);
+
+    var downloadLink = document.createElement('a');
+    downloadLink.href = url;
+    downloadLink.className = "download-link";
+    downloadLink.innerText = 'Download PDF now ↓';
+    wrapper.appendChild(downloadLink);
+
+    var renderPage = function(page) {
+        var scale = 1.5;
+        var viewport = page.getViewport(scale);
+        // Fetch canvas' 2d context
+        var context = canvas.getContext('2d');
+        // Set dimensions to Canvas
+        canvas.height = viewport.height;
+        canvas.width = viewport.width;
+        canvas.style.maxWidth = '100%';
+        // Prepare object needed by render method
+        var renderContext = {
+            canvasContext: context,
+            viewport: viewport
+        };
+        // Render PDF page
+        page.render(renderContext);
+        if (currentPage < pdf.numPages) {
+            currentPage++;
+            var newCanvas = document.createElement('canvas');
+            scroller.insertBefore(newCanvas, canvas.nextSibling);
+            scroller.insertBefore(document.createElement('hr'), canvas.nextSibling);
+            canvas = newCanvas;
+            pdf.getPage(currentPage).then(renderPage);
+        }
+    };
+    var currentPage = 1;
+    pdfjsLib.getDocument(url)
+        .then(function(pdfLocal) {
+            pdf = pdfLocal;
+            return pdf.getPage(1);
+        })
+        .then(renderPage);
+};
+
+
+window.addEventListener('DOMContentLoaded', function() {
+    Array.prototype.forEach.call(document.querySelectorAll('canvas[data-pdfurl]'), renderPdf);
+});
+</script>
