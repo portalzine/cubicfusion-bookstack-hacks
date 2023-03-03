@@ -1,0 +1,49 @@
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/papaparse@5.4.0/papaparse.min.js"></script> 
+<script src="https://unpkg.com/gridjs/dist/gridjs.umd.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/gridjs/dist/theme/mermaid.min.css" rel="stylesheet" />
+<script>
+function init() {
+    document.querySelectorAll('.page-content  a').forEach((node, i) => {
+        let parent = node;
+        let unique_id = i;
+        let text = node.textContent
+        let link = node.href
+
+        if (text.search(/.csv/) !== -1) {
+            let table = document.createElement('table');
+            let header;
+            let rows = [];
+
+            Papa.parse(link, {
+                download: true,
+                header: false,
+                complete: function(results) {
+                    results.data.map(function(data, index) {
+                        if (index == 0) {
+                            header = data;
+                        } else {
+                            rows.push(data);
+                        }
+                    });
+                    const csv_wrapper = document.createElement("div");
+                    csv_wrapper.setAttribute("id", "csv_wrapper_" + unique_id);
+                    parent.after(csv_wrapper);
+
+                    new gridjs.Grid({
+                        search: true,
+                        columns: header,
+                        data: rows,
+                        fixedHeader: true,
+                        sort: true,
+                        pagination: {
+                            limit: 6
+                        }
+                    }).render(document.getElementById("csv_wrapper_" + unique_id));
+
+                }
+            });
+        }
+    });
+}
+window.addEventListener('DOMContentLoaded', init);
+</script>
