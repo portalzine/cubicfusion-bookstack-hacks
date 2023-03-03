@@ -6,8 +6,9 @@ function init() {
     document.querySelectorAll('.page-content  a').forEach((node, i) => {
         let parent = node;
         let unique_id = i;
-        let text = node.textContent
-        let link = node.href
+        let text = node.textContent;
+        let link = node.href;
+		let json = JSON.parse(node.getAttribute("title"));
 
         if (text.search(/.csv/) !== -1) {
             let table = document.createElement('table');
@@ -19,6 +20,13 @@ function init() {
                 header: false,
                 complete: function(results) {
                     results.data.map(function(data, index) {
+					 	if(!!json){                         
+                        	let removeValFrom = json.remove_cols;
+                      		data = data.filter(function(value, index) {
+     			  				return removeValFrom.indexOf(index) == -1;
+							})
+                      	}
+						
                         if (index == 0) {
                             header = data;
                         } else {
