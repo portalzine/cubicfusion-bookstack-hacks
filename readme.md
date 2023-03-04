@@ -2,7 +2,7 @@
 
 These are my little hacks for Bookstack. 
 As I use most of these myself and update [Bookstack](https://www.bookstackapp.com/) via Docker on a regular basis, these should work on the latest versions.  
-But like always no guarantee. 
+But like always no guarantee!
 
 **CSV - Visualizer**  
 Using Papa parse + Grid.JS to display CSV data from linked files.  
@@ -11,6 +11,12 @@ Using Papa parse + Grid.JS to display CSV data from linked files.
 **PDF - Embed**  
 Embed PDF within page for preview  
 [Documentation](https://github.com/BookStackApp/BookStack/issues/705 )
+
+### Main Bookstack Hacks
+
+[GitHub - BookStackApp/hacks](https://github.com/BookStackApp/hacks)
+
+[Main Website Hacks Listing](https://www.bookstackapp.com/hacks/)
 
 ### Support & Issues
 
